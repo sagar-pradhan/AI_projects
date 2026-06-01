@@ -119,8 +119,42 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    pageRank_Value = {}
-    
+    N = len(corpus)
+    ranks = {
+        page: 1 / N
+        for page in corpus
+    }
+
+    while True:
+        new_ranks = {}
+
+        for page in corpus:
+            rank_sum = 0
+            for other_page in corpus:
+                if page in corpus[other_page]:
+                    rank_sum += (
+                        ranks[other_page]
+                        / len(corpus[other_page])
+                    )
+                elif len(corpus[other_page]) == 0:
+                    rank_sum += ranks[other_page]/N
+            
+            new_ranks[page] = (
+                (1 - damping_factor) / N
+                + damping_factor * rank_sum
+            )
+        converged = True
+
+        for page in corpus:
+            if abs(new_ranks[page] - ranks[page]) > 0.001:
+                converged = False
+                break
+
+        ranks = new_ranks
+
+        if converged:
+            return ranks
+
 
 
 if __name__ == "__main__":
